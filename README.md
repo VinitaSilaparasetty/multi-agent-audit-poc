@@ -10,22 +10,24 @@ This system demonstrates a robust architectural response to the regulatory deman
 
 ```mermaid
 graph LR
-    %% Main Flow
+    %% Primary Flow
     A([User Query]) --> B[Shopping Agent]
     B --> C[ML Ranking Node]
     
-    %% Compliance Section (Separated Horizontally)
     subgraph Compliance ["<b>Compliance Layer (Art. 12 & 14)</b>"]
-        direction TB
         D{Human Gate}
         E[Save Audit Log]
     end
 
     C --> D
+    
+    %% Approval Branch (Straight Line)
     D -- Approved --> F[Order Agent]
-    D -- Rejected --> G([End Project])
     F --> E
     E --> H([Final Transaction])
+
+    %% Rejection Branch (Exit Path)
+    D -- Rejected --> G([End Project])
 
     %% Professional Styling
     style D fill:#ff9f43,stroke:#333,stroke-width:2px
