@@ -4,7 +4,7 @@
 
 ---
 
-## 🏗 Project Architecture
+## Project Architecture
 
 This system demonstrates a robust architectural response to the regulatory demands of the EU AI Act (Articles 12 & 14). By utilizing **LangGraph**, we replace autonomous "black-box" behavior with a predictable state machine.
 
@@ -37,7 +37,7 @@ graph LR
 
 ---
 
-## 🚀 Key Features
+## Key Features
 
 * **Deterministic Orchestration:** Built with LangGraph to ensure the AI follows a strictly defined path.
 * **Hybrid Intelligence:** LLMs handle the search, but a **Scikit-learn** ML model handles objective ranking to prevent model bias.
@@ -47,7 +47,7 @@ graph LR
 
 ---
 
-## 🛠 Setup & Installation
+## Setup & Installation
 
 1. **Set Local Python Version:**
    ```bash
@@ -68,7 +68,7 @@ graph LR
 
 ---
 
-## ⚖️ Regulatory Alignment
+## Regulatory Alignment
 
 | Article | Requirement | Implementation |
 | :--- | :--- | :--- |
