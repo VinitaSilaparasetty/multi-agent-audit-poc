@@ -9,22 +9,27 @@
 This system demonstrates a robust architectural response to the regulatory demands of the EU AI Act (Articles 12 & 14). By utilizing **LangGraph**, we replace autonomous "black-box" behavior with a predictable state machine.
 
 ```mermaid
-graph TD
-    A[User Query] --> B[Shopping Agent]
-    B --> C[ML Ranking Node]
-    C --> D{Human Gate}
-    D -- Rejected --> E[End / Revise]
-    D -- Approved --> F[Order Agent]
-    F --> G[Save Audit Log]
-    G --> H[Final Transaction]
-
-    subgraph "Compliance Layer (Art. 12 & 14)"
-    D
-    G
-    end
+graph TB
+    %% Nodes
+    Start([User Query]) --> Shop[Shopping Agent]
+    Shop --> Rank[ML Ranking Node]
     
-    style D fill:#f96,stroke:#333,stroke-width:2px
-    style G fill:#f96,stroke:#333,stroke-width:2px
+    subgraph Compliance_Layer ["<b>Compliance Layer (Art. 12 & 14)</b>"]
+        direction TB
+        Gate{Human Gate}
+        Log[Save Audit Log]
+    end
+
+    Rank --> Gate
+    Gate -- Approved --> Order[Order Agent]
+    Gate -- Rejected --> End([End / Revise])
+    Order --> Log
+    Log --> Final([Final Transaction])
+
+    %% Styling
+    style Gate fill:#ff9f43,stroke:#333,stroke-width:2px
+    style Log fill:#ff9f43,stroke:#333,stroke-width:2px
+    style Compliance_Layer fill:#f8f9fa,stroke:#dee2e6,stroke-dasharray: 5 5
 ```
 
 ---
