@@ -1,75 +1,24 @@
-
-from src.schema.audit import AuditEntry
-
-
+from datetime import datetime, timezone
+from src.state.schema import AuditEntry
 
 def shopping_agent(state):
-
-    """Node: Recommends products and logs the event for traceability."""
-
-    results = [{"id": 1, "name": "Standard Laptop", "price": 999}]
-
-    
-
-    # Create the Audit Entry (Mandatory for Compliance)
-
-    new_entry = AuditEntry(
-
+    """Simulates a shopping search and adds an audit entry."""
+    entry = AuditEntry(
         node_name="shopping_agent",
-
-        event_type="inference",
-
-        input_data=state["query"],
-
-        output_data=results,
-
-        rationale="Top results based on keyword relevance."
-
+        ev_rationale="Top results based on keyword relevance."
     )
-
-    
-
-    return {
-
-        "results": results,
-
-        "audit_trail": state["audit_trail"] + [new_entry]
-
-    }
-
-
+    # Ensure any manual datetime calls use timezone.utc
+    new_trail = state.get("audit_trail", []) + [entry]
+    return {"results": [{"id": 1, "name": "Standard Laptop", "price": 999}], "audit_trail": new_trail}
 
 def order_agent(state):
-
-    """Node: Processes the order ONLY if human approved."""
-
+    """Checks for human approval before 'processing' an order."""
     if not state.get("is_approved"):
-
-        raise ValueError("Regulatory violation: Human approval missing for order.")
-
-        
-
-    new_entry = AuditEntry(
-
-        node_name="order_agent",
-
-        event_type="human_intervention",
-
-        input_data=state["selected_product"],
-
-        output_data="Order Processed",
-
-        human_verifier_id="operator_01", # ID of the person who hit 'Approve'
-
-        rationale="Human operator verified price and availability."
-
-    )
-
+        raise ValueError("Regulatory violation: Human approval missing (Art. 14)")
     
-
-    return {
-
-        "audit_trail": state["audit_trail"] + [new_entry]
-
-    }
-
+    entry = AuditEntry(
+        node_name="order_agent",
+        ev_rationale="Transaction finalized after human verification."
+    )
+    new_trail = state.get("audit_trail", []) + [entry]
+    return {"audit_trail": new_trail}

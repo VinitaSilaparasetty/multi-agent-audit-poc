@@ -1,46 +1,42 @@
 from flask import Flask, request, jsonify
 from src.main_graph import app as agent_graph
-from src.utils.logger import save_audit_log
+import uuid
 
 app = Flask(__name__)
 
-@app.route("/process", methods=["POST"])
-def process_request():
-    """Starts the agentic flow and pauses at the human checkpoint."""
+@app.route('/')
+def index():
+    return "<h1>Multi-Agent Audit POC</h1><p>API is running. Use <b>/process</b> or <b>/approve</b> endpoints to interact.</p>"
+
+@app.route('/process', methods=['POST'])
+def process():
     data = request.json
-    thread_id = data.get("thread_id", "default_thread")
+    thread_id = data.get("thread_id", str(uuid.uuid4()))
     config = {"configurable": {"thread_id": thread_id}}
     
-    # Initialize the state and run until the 'order' node (the interrupt)
-    initial_state = {
-        "query": data.get("query"),
-        "audit_trail": []
-    }
+    # Run the graph
+    result = agent_graph.invoke({"query": data["query"]}, config)
     
-    agent_graph.invoke(initial_state, config)
-    return jsonify({"status": "pending_approval", "message": "AI has ranked products. Awaiting human oversight."})
+    # FIX: Convert Pydantic objects to dictionaries so Flask can serialize them
+    if "audit_trail" in result:
+        result["audit_trail"] = [entry.model_dump() if hasattr(entry, 'model_dump') else entry for entry in result["audit_trail"]]
+    
+    return jsonify({"status": "pending_approval", "thread_id": thread_id, "data": result})
 
-@app.route("/approve", methods=["POST"])
-def approve_action():
-    """Resumes the flow after human verification and saves the audit trail."""
+@app.route('/approve', methods=['POST'])
+def approve():
     data = request.json
     thread_id = data.get("thread_id")
     config = {"configurable": {"thread_id": thread_id}}
     
-    # Update state with human approval flag
-    agent_graph.update_state(config, {"is_approved": True, "selected_product": data.get("product")})
+    agent_graph.update_state(config, {"is_approved": True})
+    result = agent_graph.invoke(None, config)
     
-    # Resume the graph to finish the 'order' node
-    final_state = agent_graph.invoke(None, config)
-    
-    # MANDATORY COMPLIANCE STEP: Save the state to the Audit Log
-    save_audit_log(final_state, thread_id)
-    
-    return jsonify({
-        "status": "success", 
-        "message": "Order processed and logged to Audit Trail.",
-        "log_reference": f"audit_trail_{thread_id}.json"
-    })
+    # FIX: Convert Pydantic objects to dictionaries here as well
+    if "audit_trail" in result:
+        result["audit_trail"] = [entry.model_dump() if hasattr(entry, 'model_dump') else entry for entry in result["audit_trail"]]
+        
+    return jsonify({"status": "completed", "data": result})
 
 if __name__ == "__main__":
-    app.run(port=5000, debug=True)
+    app.run(debug=True, port=5000)
