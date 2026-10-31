@@ -76,3 +76,9 @@ graph LR
 | **Art. 14** | Human Oversight | LangGraph `interrupt_before` ensures a human must set `is_approved`. |
 | **Art. 13** | Transparency | ML Ranking node provides objective, explainable scoring criteria. |
 
+
+---
+
+## Licence
+
+AGPL-3.0, see `LICENSE`. Copyright (C) 2026 Vinita Silaparasetty, Aevoxis Solutions. For a commercial licence, contact info@aevoxis.de.
