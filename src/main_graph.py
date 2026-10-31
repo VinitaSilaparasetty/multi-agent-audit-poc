@@ -1,38 +1,39 @@
 import os
+from typing import TypedDict, List, Annotated
+import operator
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langgraph.graph import StateGraph, END
-from langgraph.checkpoint.memory import MemorySaver
-from src.state.schema import AgentState
-from src.agents.logic import shopping_agent, order_agent
+
+class AgentState(TypedDict):
+    query: str
+    results: List[dict]
+    compliance_logs: Annotated[List[str], operator.add]
+    agent_outcome: str
+
+from agents.logic import shopping_agent, order_agent, poc_notice_agent
 
 load_dotenv()
+llm = ChatOpenAI(model="llama-3.1-8b-instant", openai_api_key=os.getenv("GROQ_API_KEY"), openai_api_base="https://api.groq.com/openai/v1")
 
-# Configuration for Llama 3.2 via Groq
-llm = ChatOpenAI(
-    model="llama-3.2-3b-preview", 
-    openai_api_base="https://api.groq.com/openai/v1",
-    openai_api_key=os.getenv("GROQ_API_KEY"),
-    temperature=0
-)
+def router(state):
+    q = state["query"].lower()
+    # Active Demo Intents
+    if any(word in q for word in ["buy", "purchase", "pay", "order"]):
+        return "order"
+    # Placeholder for non-demo intents
+    if any(word in q for word in ["refund", "status", "help", "broken", "return"]):
+        return "notice"
+    return "shopping"
 
-# Initialize Memory (The Checkpointer)
-memory = MemorySaver()
-
-# Initialize the Graph
 workflow = StateGraph(AgentState)
+workflow.add_node("shopping", shopping_agent)
+workflow.add_node("order", order_agent)
+workflow.add_node("notice", poc_notice_agent)
 
-# Define Nodes
-workflow.add_node("shopping_agent", shopping_agent)
-workflow.add_node("order_gate", order_agent)
+workflow.set_conditional_entry_point(router, {"shopping": "shopping", "order": "order", "notice": "notice"})
+workflow.add_edge("shopping", END)
+workflow.add_edge("order", END)
+workflow.add_edge("notice", END)
 
-# Build Edges
-workflow.set_entry_point("shopping_agent")
-workflow.add_edge("shopping_agent", "order_gate")
-workflow.add_edge("order_gate", END)
-
-# Compile with BOTH the interrupt AND the checkpointer
-app = workflow.compile(
-    checkpointer=memory,
-    interrupt_before=["order_gate"]
-)
+app = workflow.compile()

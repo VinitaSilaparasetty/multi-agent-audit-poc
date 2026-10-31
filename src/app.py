@@ -1,42 +1,44 @@
-from flask import Flask, request, jsonify
-from src.main_graph import app as agent_graph
-import uuid
+import sys
+import os
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
+
+from flask import Flask, request, jsonify, render_template
+import main_graph
 
 app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return "<h1>Multi-Agent Audit POC</h1><p>API is running. Use <b>/process</b> or <b>/approve</b> endpoints to interact.</p>"
+    return render_template('index.html')
 
-@app.route('/process', methods=['POST'])
-def process():
+@app.route('/chat', methods=['POST'])
+def chat():
     data = request.json
-    thread_id = data.get("thread_id", str(uuid.uuid4()))
-    config = {"configurable": {"thread_id": thread_id}}
+    user_message = data.get("message", "")
+    config = {"configurable": {"thread_id": "final-debug-session"}}
     
-    # Run the graph
-    result = agent_graph.invoke({"query": data["query"]}, config)
-    
-    # FIX: Convert Pydantic objects to dictionaries so Flask can serialize them
-    if "audit_trail" in result:
-        result["audit_trail"] = [entry.model_dump() if hasattr(entry, 'model_dump') else entry for entry in result["audit_trail"]]
-    
-    return jsonify({"status": "pending_approval", "thread_id": thread_id, "data": result})
-
-@app.route('/approve', methods=['POST'])
-def approve():
-    data = request.json
-    thread_id = data.get("thread_id")
-    config = {"configurable": {"thread_id": thread_id}}
-    
-    agent_graph.update_state(config, {"is_approved": True})
-    result = agent_graph.invoke(None, config)
-    
-    # FIX: Convert Pydantic objects to dictionaries here as well
-    if "audit_trail" in result:
-        result["audit_trail"] = [entry.model_dump() if hasattr(entry, 'model_dump') else entry for entry in result["audit_trail"]]
+    try:
+        # Invoke graph
+        final_state = main_graph.app.invoke({"query": user_message}, config=config)
         
-    return jsonify({"status": "completed", "data": result})
+        # Pull data with fallback defaults
+        outcome = final_state.get("agent_outcome", "The agent processed your request but returned no text.")
+        logs = final_state.get("compliance_logs", ["Audit complete (No logs generated)"])
+        
+        # Terminal Debugging
+        print(f"\n--- AUDIT DATA SENT TO UI ---")
+        print(f"Outcome: {outcome}")
+        print(f"Logs: {logs}")
+        
+        return jsonify({
+            "agent_outcome": outcome,
+            "compliance_logs": logs
+        })
+    except Exception as e:
+        print(f"❌ Backend Error: {e}")
+        return jsonify({"agent_outcome": f"Error: {str(e)}", "compliance_logs": ["Audit failed"]}), 500
 
-if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+if __name__ == '__main__':
+    app.run(port=5000, debug=True, use_reloader=False)
