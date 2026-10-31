@@ -1,5 +1,21 @@
-iniconfig==2.3.0
-packaging==26.0
-pluggy==1.6.0
-Pygments==2.19.2
-pytest==9.0.2
+# agent graph
+langgraph
+langchain-core
+langchain-openai
+pydantic
+
+# retrieval / embeddings
+pinecone
+sentence-transformers>=3.0.0
+transformers>=4.41.0
+torch>=2.2.2
+numpy<2
+datasets
+scikit-learn
+
+# web app
+flask
+python-dotenv
+
+# tests
+pytest>=8.0
