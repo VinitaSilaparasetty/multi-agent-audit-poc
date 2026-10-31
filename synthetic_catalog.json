@@ -1,0 +1,72 @@
+[
+     {
+      "SKU ID": "1001",
+      "Product Name": "Smart Android TV ",
+      "price": 249.95,
+      "category": "Electronics",
+      "description": "4K LED Android TV"
+     },
+     {
+      "SKU ID": "1002",
+      "Product Name": "Wireless Gaming Headset",
+      "price": 79.99,
+      "category": "Electronics",
+      "description": "7.1 Surround Sound with wireless connectivity"
+     },
+     {
+      "SKU ID": "1003",
+      "Product Name": "2K Monitor",
+      "price": 169.99,
+      "category": "Electronics",
+      "description": "24 inch 2K display with high refresh rate"
+     },
+     {
+      "SKU ID": "1004",
+      "Product Name": "Smartwatch with GPS",
+      "price": 129.95,
+      "category": "Electronics",
+      "description": "Track your fitness goals and location with our smartwatch"
+     },
+     {
+      "SKU ID": "1005",
+      "Product Name": "Portable Power Bank",
+      "price": 29.95,
+      "category": "Electronics",
+      "description": "High-capacity power bank to charge on the go"
+     },
+     {
+      "SKU ID": "1006",
+      "Product Name": "Bluetooth Speaker",
+      "price": 49.95,
+      "category": "Electronics",
+      "description": "Wireless speaker with long battery life"
+     },
+     {
+      "SKU ID": "1007",
+      "Product Name": "4K Action Camera",
+      "price": 179.99,
+      "category": "Electronics",
+      "description": "Capture stunning 4K videos with our action camera"
+     },
+     {
+      "SKU ID": "1008",
+      "Product Name": "Gaming Console",
+      "price": 399.99,
+      "category": "Electronics",
+      "description": "Next-gen gaming console with advanced features"
+     },
+     {
+      "SKU ID": "1009",
+      "Product Name": "Wireless Earbuds",
+      "price": 69.99,
+      "category": "Electronics",
+      "description": "Water-resistant earbuds with long battery life"
+     },
+     {
+      "SKU ID": "1010",
+      "Product Name": "2-in-1 Laptop Tablet",
+      "price": 499.99,
+      "category": "Electronics",
+      "description": "Convert your laptop into a tablet with our 2-in-1 device"
+     }
+    ]
